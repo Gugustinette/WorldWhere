@@ -33,7 +33,8 @@ let db = {};
 */
 
 // Fetch tweets
-twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', max_results: 10 })
+twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', 
+max_results: 100 })
     .then(result => {
         var tweets = result.data;
 
