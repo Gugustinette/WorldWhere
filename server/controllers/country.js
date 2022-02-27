@@ -7,6 +7,7 @@
 
 
 const Country = require('../models/Country');
+const CountryData = require('../models/CountryData');
 
 
 /**
@@ -16,12 +17,38 @@ const Country = require('../models/Country');
 exports.getCountries = (req, res, next) => {
     // Get recent data from database
     Country.find({})
-        .sort({
-            createdAt: -1
-        })
-        .limit(10)
         .then(countries => {
-            res.status(200).json(countries);
+            // Get country data from database (1 hour ago)
+            CountryData.find({
+                date: {
+                    $gte: new Date(new Date().getTime() - 3600000)
+                }
+            })
+            .then(countriesData => {
+
+                // Return countries and country data
+                var countriesWithData = [];
+                countries.forEach(country => {
+                    // Find corresponding country data
+                    var countryData = countriesData.find(countryData => countryData.country.toString() === country._id.toString());
+                    countriesWithData.push({
+                        country: {
+                            name: country.name
+                        },
+                        percentageOfPopularity: countryData ? countryData.percentageOfPopularity : undefined
+                    });
+                });
+
+                res.status(200).json({
+                    data: countriesWithData,
+                })
+            })
+            .catch(err => {
+                res.status(500).json({
+                    message: 'Failed to get country data',
+                    error: err
+                });
+            });
         })
         .catch(error => {
             res.status(400).json({

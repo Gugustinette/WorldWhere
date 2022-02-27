@@ -29,69 +29,77 @@ const mongoose = require('mongoose');
 const Country = require('../server/models/Country');
 const CountryData = require('../server/models/CountryData');
 
-let db = {};
-
+// fs
 const fs = require('fs');
+
+// Config
+const nbTweets = 100;
+
+
 
 
 /**
- * Script
+ * Functions
 */
 
-// Fetch data
+/**
+ * Fetch Last Data - Fetch the last data from Twitter
+ * @returns {Promise} - A promise that resolves to an array of valid countries
+ */
 function fetchLastData() {
-    twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', 
-    max_results: 10 })
-        .then(result => {
-            var tweets = result.data;
-    
-            // Make promises for each tweet
-            var tweetsProcess = tweets.map(tweet => {
-                return new Promise((resolve, reject) => {
-    
-                    // Extract entities from text
-                    nerPromise.process(tweet.text)
-                    .then(entities => {
-                        // Entities are LOCATION or PERSON or ORGANIZATION
-                        console.log(entities);
-    
-                        if (entities.LOCATION) {
-                            entities.LOCATION.forEach(location => {
-                                var gpe = location.toLowerCase();
-                                if (db[gpe] === undefined) { // If not in db, create new entry
-                                    db[gpe] = {
-                                        count: 1
-                                    };
-                                } else { // If in db, increment count
-                                    db[gpe].count++;
-                                }
-                            });
-                        }
-    
-                        // Resolve promise
-                        resolve();
-                    })
-                    .catch((err) => {
-                        // Reject promise
-                        reject(err);
+    let lastData = {};
+    return new Promise((resolveMAIN, rejectMAIN) => {
+        twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', 
+        max_results: nbTweets })
+            .then(result => {
+                var tweets = result.data;
+
+                // Make promises for each tweet
+                var tweetsProcess = tweets.map(tweet => {
+                    return new Promise((resolve, reject) => {
+
+                        // Extract entities from text
+                        nerPromise.process(tweet.text)
+                        .then(entities => {
+                            // Entities are LOCATION or PERSON or ORGANIZATION
+                            // console.log(entities);
+        
+                            if (entities.LOCATION) {
+                                entities.LOCATION.forEach(location => {
+                                    var gpe = location.toLowerCase();
+                                    if (lastData[gpe] === undefined) { // If not in lastData, create new entry
+                                        lastData[gpe] = {
+                                            count: 1
+                                        };
+                                    } else { // If in lastData, increment count
+                                        lastData[gpe].count++;
+                                    }
+                                });
+                            }
+        
+                            // Resolve promise
+                            resolve();
+                        })
+                        .catch((err) => {
+                            // Reject promise
+                            reject(err);
+                        });
                     });
                 });
-            });
-    
-            // Launch all promises
-            var promises = Promise.allSettled(tweetsProcess);
-            promises.then(() => {
-                console.log("///////////////////// Database: ");
-                console.log(db);
-                fs.writeFileSync('data.json', JSON.stringify(db));
-            });
-        })
-        .catch(err => {
-            console.error(err);
-        });
-}
 
-// Read data
+                // Launch all promises
+                var promises = Promise.allSettled(tweetsProcess);
+                promises.then(() => {
+                    // For tests only
+                    // fs.writeFileSync('data.json', JSON.stringify(db));
+                    resolveMAIN(lastData);
+                });
+            })
+            .catch(err => {
+                rejectMAIN(err);
+            });
+    });
+}
 
 /**
  * Handle Countries - Add new countries if needed and return new valid countries
@@ -124,7 +132,7 @@ function handleCountries(lastData) {
                                     name: country,
                                 });
                                 // Save new Country
-                                return newCountry.save()
+                                newCountry.save()
                                 .then(() => { // If saved, add to db
                                     resolve(newCountry.name);
                                 })
@@ -132,9 +140,11 @@ function handleCountries(lastData) {
                                     reject(err);
                                 });
                             }
+                            else {
+                                resolve(country);
+                            }
                         }
                     });
-                    resolve(country);
                 } else { // If not valid, do nothing
                     resolve();
                 }
@@ -197,17 +207,26 @@ function addNewData(lastData, validCountries) {
 }
 
 
+
+
+
+/**
+ * Main
+*/
+
 function main() {
     mongoose.connect('mongodb://localhost:27017/worldwhere3', { useNewUrlParser: true });
 
-    fs.readFile("data.json", 'utf8', (error, data) => {
-        var lastData = JSON.parse(data);
+    // Fetch last data
+    fetchLastData()
+    .then(lastData => {
+        console.log(lastData);
         handleCountries(lastData) // Handle Countries
         .then(validCountries => {
             addNewData(lastData, validCountries) // Add New Data
             .then((countriesData) => {
                 console.log("///////////////////// All done");
-                // mongoose.disconnect();
+                mongoose.disconnect();
             })
             .catch(err => {
                 console.log(err);
@@ -220,5 +239,5 @@ function main() {
 }
 
 
-main();
+main()
 

@@ -8,8 +8,10 @@ const Bree = require('bree');
 
 const bree = new Bree({
     jobs: [
+        'fetchCountriesData',
+
         // Run fetchData job every minute
-        { name: 'fetchData', interval: '5s' },
+        // { name: 'fetchData', interval: '5s' },
 
         /*
         // Run clean logs job At 02:17 AM on Sunday (with cron schedule)
@@ -17,5 +19,5 @@ const bree = new Bree({
         */
     ]
 });
-  
+
 bree.start();

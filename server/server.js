@@ -13,7 +13,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 // Routes Dependencies
-const mapRouter = require('./routes/map');
+const countryRouter = require('./routes/country');
 
 // Swagger Dependencies
 const expressJSDocSwagger = require('express-jsdoc-swagger');
@@ -55,7 +55,7 @@ app.use(cors(
 ));
 
 // Configure Routes
-app.use('/api/map', mapRouter);
+app.use('/api/country', countryRouter);
 
 // Configure Swagger
 expressJSDocSwagger(app)(options);

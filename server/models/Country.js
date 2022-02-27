@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 
 /**
  * Country type
- * @typedef {object} country
+ * @typedef {object} Country
  * @property {string} _id - The id of the country
  * @property {string} name - The name of the country
  */
