@@ -25,7 +25,6 @@ const twitterClient = new TwitterApi(tokenTwitter);
 
 // Database
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/worldwhere3', {useUnifiedTopology: true, useNewUrlParser: true});
 
 const Country = require('../server/models/Country');
 const CountryData = require('../server/models/CountryData');
@@ -39,7 +38,7 @@ const fs = require('fs');
  * Script
 */
 
-// Fetch tweets
+// Fetch data
 function fetchLastData() {
     twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', 
     max_results: 10 })
@@ -93,21 +92,133 @@ function fetchLastData() {
 }
 
 // Read data
-function addDataToDb(lastData) {
-    console.log(lastData);
 
-    // Countries Set
-    var countriesSet = JSON.parse(fs.readFileSync("data/countries.json", 'utf8'));
-    countriesSet.forEach((country) => {
-        country.name = country.name.toLowerCase();
+/**
+ * Handle Countries - Add new countries if needed and return new valid countries
+ * @param {A} lastData - The last data fetched from Twitter
+ * @returns {Promise} - A promise that resolves to an array of valid countries
+ */
+function handleCountries(lastData) {
+    return new Promise((resolveMAIN, rejectMAIN) => {
+
+        // Countries Set
+        var countriesSet = JSON.parse(fs.readFileSync("data/countries.json", 'utf8'));
+        countriesSet.forEach((country) => {
+            country.name = country.name.toLowerCase();
+        });
+
+        // Iterate over lastData countries
+        Promise.all(Object.keys(lastData).map(country => {
+            return new Promise((resolve, reject) => {
+                // Check if country is valid
+                var countryInSet = countriesSet.find(c => c.name === country);
+                if (countryInSet) { // If valid, add to db
+                    // Check if country is allready in db
+                    Country.findOne({ name: country }, (err, countryDb) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            if (!countryDb) {
+                                // Create new country
+                                var newCountry = new Country({
+                                    name: country,
+                                });
+                                // Save new Country
+                                return newCountry.save()
+                                .then(() => { // If saved, add to db
+                                    resolve(newCountry.name);
+                                })
+                                .catch(err => {
+                                    reject(err);
+                                });
+                            }
+                        }
+                    });
+                    resolve(country);
+                } else { // If not valid, do nothing
+                    resolve();
+                }
+            });
+        }))
+        .then((countries) => {
+            countries = countries.filter(c => c);
+            resolveMAIN(countries);
+        })
+        .catch(err => {
+            rejectMAIN(err);
+        });
     });
+}
 
-    console.log(countriesSet);
+/**
+ * Add New Data - Add new data to the database
+ * @param {A} lastData - The last data fetched from Twitter
+ * @param {A} validCountries - The countries that are valid and should be added to the database
+ * @returns {Promise} - A promise that resolves to an array of valid countries
+ */
+function addNewData(lastData, validCountries) {
+    return new Promise((resolveMAIN, rejectMAIN) => {
+        // Iterate over validCountries to calculate the total count
+        var totalCount = 0;
+        validCountries.forEach(country => {
+            totalCount += lastData[country].count;
+        });
+
+        // Iterate over countries
+        Promise.all(validCountries.map(country => {
+            return new Promise((resolve, reject) => {
+                // Find country in db
+                Country.findOne({ name: country })
+                .then(countryDb => {
+                    // Create new countryData
+                    var newCountryData = new CountryData({
+                        country: countryDb._id,
+                        percentageOfPopularity: lastData[country].count / totalCount * 100,
+                    });
+                    // Save new CountryData
+                    newCountryData.save()
+                    .then(() => {
+                        resolve(newCountryData);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    });
+                });
+            });
+        }))
+        .then((countriesData) => {
+            countriesData = countriesData.filter(c => c);
+            resolveMAIN(countriesData);
+        })
+        .catch(err => {
+            rejectMAIN(err);
+        });
+    });
 }
 
 
-fs.readFile("data.json", 'utf8', (error, data) => {
-    addDataToDb(JSON.parse(data));
+function main() {
+    mongoose.connect('mongodb://localhost:27017/worldwhere3', { useNewUrlParser: true });
 
-    mongoose.disconnect();
-});
+    fs.readFile("data.json", 'utf8', (error, data) => {
+        var lastData = JSON.parse(data);
+        handleCountries(lastData) // Handle Countries
+        .then(validCountries => {
+            addNewData(lastData, validCountries) // Add New Data
+            .then((countriesData) => {
+                console.log("///////////////////// All done");
+                // mongoose.disconnect();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    });
+}
+
+
+main();
+
