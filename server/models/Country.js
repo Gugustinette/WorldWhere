@@ -18,6 +18,10 @@ const countrySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    death: {
+        type: Number,
+        required: true,
+    }
 });
 
 module.exports = mongoose.model('Country', countrySchema);
