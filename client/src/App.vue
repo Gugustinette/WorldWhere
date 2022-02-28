@@ -26,6 +26,8 @@ export default {
   --red: #e74c3c;
   --violet: #7b61ff;
 
+  --global-content-spacing: 6%;
+
   --font-on-primary: #ffffff;
   --font-on-background: #2f3542;
 
@@ -36,6 +38,7 @@ export default {
 * {
   margin: 0;
   padding: 0;
+  color: var(--primary);
 }
 
 #app {

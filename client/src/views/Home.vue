@@ -2,6 +2,7 @@
   <div class="home">
     <Header />
     <div class="content">
+      <h2>Carte des tendances</h2>
       <Map />
     </div>
   </div>
@@ -28,8 +29,14 @@ export default {
   width: 100%;
 
   .content {
-    padding-left: 4%;
-    padding-right: 4%;
+    padding-left: var(--global-content-spacing);
+    padding-right: var(--global-content-spacing);
+    margin-bottom: 100px;
+
+    h2 {
+      text-align: left;
+      margin-bottom: 10px;
+    }
   }
 }
 </style>

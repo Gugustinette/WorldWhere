@@ -49,9 +49,9 @@ header {
   }
 
   .header-content {
-    padding-left: 4%;
-    padding-right: 4%;
-    margin-bottom: 100px;
+    padding-left: var(--global-content-spacing);
+    padding-right: var(--global-content-spacing);
+    margin-bottom: 20px;
 
     .header-section {
       width: 100%;
