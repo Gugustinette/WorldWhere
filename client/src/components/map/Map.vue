@@ -32,12 +32,15 @@ export default {
       location: [51.505, -0.09],
       MODE_Country: true,
       MODE_Region: false,
+      map: null,
     };
   },
   mounted() {
-    let map = L.map("map").setView(this.location);
-    map.setZoom(this.zoom);
+    // Leaflet setup
+    this.map = L.map("map").setView(this.location);
+    this.map.setZoom(this.zoom);
 
+    // Base tiles
     L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
       {
@@ -46,7 +49,9 @@ export default {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       }
-    ).addTo(map);
+    ).addTo(this.map);
+
+    this.getDataByCountries();
   },
   methods: {
     showCountries() {
@@ -56,6 +61,70 @@ export default {
     showRegions() {
       this.MODE_Country = false;
       this.MODE_Region = true;
+    },
+    getDataByCountries() {
+      // Get daya by countries
+      this.$store
+        .dispatch("getDataByCountries")
+        .then((countries) => {
+          countries = countries.data;
+          // Get public GeoJSON data
+          this.$store.dispatch("getGeoJSON").then((geoJSON) => {
+            // Remove unecessary data
+            var CountriesGeoJSON = {
+              type: "FeatureCollection",
+              features: [],
+            };
+
+            countries.forEach((country) => {
+              var countryGeoJSON = geoJSON.features.find(
+                (feature) =>
+                  feature.properties.ADMIN.toLowerCase() ===
+                  country.country.name
+              );
+              if (countryGeoJSON) {
+                CountriesGeoJSON.features.push(countryGeoJSON);
+              }
+            });
+
+            this.addCountriesToMap(CountriesGeoJSON);
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    addCountriesToMap(CountriesGeoJSON) {
+      // Add countries to map
+      L.geoJSON(CountriesGeoJSON, {
+        style: () => {
+          return {
+            color: "#fff",
+            weight: 1,
+            fillColor: "#fff",
+            fillOpacity: 0.5,
+          };
+        },
+        onEachFeature: (feature, layer) => {
+          layer.on({
+            mouseover: (e) => {
+              e.target.setStyle({
+                fillOpacity: 0.8,
+              });
+            },
+            mouseout: (e) => {
+              e.target.setStyle({
+                fillOpacity: 0.5,
+              });
+            },
+            click: (e) => {
+              this.MODE_Country = true;
+              this.MODE_Region = false;
+              this.showCountries(e);
+            },
+          });
+        },
+      }).addTo(this.map);
     },
   },
 };

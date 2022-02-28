@@ -9,7 +9,7 @@ const server = require('../server');
 /**
  * Get port from environment
  */
-const port = process.env.PORT || '3000';
+const port = process.env.PORT || '3100';
 
 /**
  * Listen on provided port, on all network interfaces.
