@@ -115,6 +115,24 @@ function handleCountries(lastData) {
             country.name = country.name.toLowerCase();
         });
 
+        // Countries Acronyms
+        var countriesAcronyms = JSON.parse(fs.readFileSync("data/countriesAcronyms.json", 'utf8'));
+
+        // Iterate through lastData and countriesAcronyms to handle acronyms
+        Object.keys(lastData).forEach(country => {
+            for (var keyCountry in countriesAcronyms) {
+                if (countriesAcronyms[keyCountry].includes(country)) {
+                    if (lastData[keyCountry] === undefined) {
+                        lastData[keyCountry] = lastData[country];
+                    }
+                    else {
+                        lastData[keyCountry].count += lastData[country].count;
+                    }
+                    delete lastData[country];
+                }
+            }
+        });
+
         // Iterate over lastData countries
         Promise.all(Object.keys(lastData).map(country => {
             return new Promise((resolve, reject) => {
@@ -215,12 +233,11 @@ function addNewData(lastData, validCountries) {
 */
 
 function main() {
-    mongoose.connect('mongodb://localhost:27017/worldwhere3', { useNewUrlParser: true });
+    mongoose.connect('mongodb://localhost:27017/worldwhere', { useNewUrlParser: true });
 
     // Fetch last data
     fetchLastData()
     .then(lastData => {
-        console.log(lastData);
         handleCountries(lastData) // Handle Countries
         .then(validCountries => {
             addNewData(lastData, validCountries) // Add New Data

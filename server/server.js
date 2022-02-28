@@ -21,8 +21,8 @@ const expressJSDocSwagger = require('express-jsdoc-swagger');
 const options = {
   info: {
     version: '1.0.0',
-    title: 'WorldWhere3 Rest API',
-    description: 'WorldWhere3 Rest API Documentation',
+    title: 'WorldWhere Rest API',
+    description: 'WorldWhere Rest API Documentation',
     license: {
       name: 'MIT',
     },
@@ -61,7 +61,7 @@ app.use('/api/country', countryRouter);
 expressJSDocSwagger(app)(options);
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/worldwhere3', {useUnifiedTopology: true, useNewUrlParser: true});
+mongoose.connect('mongodb://localhost:27017/worldwhere', {useUnifiedTopology: true, useNewUrlParser: true});
 
 
 

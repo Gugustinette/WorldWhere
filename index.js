@@ -8,7 +8,8 @@ const Bree = require('bree');
 
 const bree = new Bree({
     jobs: [
-        'fetchCountriesData',
+        // 'fetchCountriesData',
+        'fetchRegionsData',
 
         // Run fetchData job every minute
         // { name: 'fetchData', interval: '5s' },
