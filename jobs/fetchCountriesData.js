@@ -1,6 +1,6 @@
 /**
- * Fetch Data Job
- * @module jobs/fetchData
+ * Fetch Data Job - Countries
+ * @module jobs/fetchCountriesData
 */
 
 

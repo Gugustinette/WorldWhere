@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
  * @typedef {object} Country
  * @property {string} _id - The id of the country
  * @property {string} name - The name of the country
+ * @property {string} death - The total death of the country
  */
 const countrySchema = new mongoose.Schema({
     name: {

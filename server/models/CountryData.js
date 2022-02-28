@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
  * @property {string} country - The id of the corresponding country
  * @property {string} date - The date of the corresponding data
  * @property {number} percentageOfPopularity - The percentage of Popularity of the country on the corresponding date
+ * @property {string} death - The number of death of the country on the corresponding date
  */
 const countryDataSchema = new mongoose.Schema({
     country: {
@@ -28,6 +29,9 @@ const countryDataSchema = new mongoose.Schema({
     percentageOfPopularity: {
         type: Number,
         required: true
+    },
+    death: {
+        type: Number
     }
 });
 

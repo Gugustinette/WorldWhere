@@ -14,6 +14,7 @@ const cors = require('cors');
 
 // Routes Dependencies
 const countryRouter = require('./routes/country');
+const regionRouter = require('./routes/region');
 
 // Swagger Dependencies
 const expressJSDocSwagger = require('express-jsdoc-swagger');
@@ -56,6 +57,7 @@ app.use(cors(
 
 // Configure Routes
 app.use('/api/country', countryRouter);
+app.use('/api/region', regionRouter);
 
 // Configure Swagger
 expressJSDocSwagger(app)(options);

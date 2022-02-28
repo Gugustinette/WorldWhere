@@ -18,7 +18,9 @@ const countryController = require('../controllers/country');
  * @tags country
  * @produces application/json
  * @security JWT
- * @param {string} query.date - date of the country
+ * @param {string} query.dateStart - date of the data
+ * @param {string} query.dateEnd - date of the data
+ * @param {boolean} query.full - if true, return all countries, else return only the countries with data
  * @return {array<Country>} 200 - Success message
  * @return {string} 400 - Error message
  * @return {string} 500 - Internal Server Error

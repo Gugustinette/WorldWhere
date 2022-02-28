@@ -1,6 +1,6 @@
 /**
- * Fetch Data Job
- * @module jobs/fetchData
+ * Fetch Data Job - Regions data
+ * @module jobs/fetchRegionsData
 */
 
 
@@ -26,14 +26,14 @@ const twitterClient = new TwitterApi(tokenTwitter);
 // Database
 const mongoose = require('mongoose');
 
-// const City = require('../server/models/City');
-// const CityData = require('../server/models/CityData');
+const City = require('../server/models/City');
+const CityData = require('../server/models/CityData');
 
 // fs
 const fs = require('fs');
 
 // Config
-const nbTweets = 100;
+const nbTweets = 20;
 
 
 
@@ -109,33 +109,66 @@ function fetchLastData() {
 function handleCities(lastData) {
     return new Promise((resolveMAIN, rejectMAIN) => {
 
+        // Cities Set
+        var citiesSet = JSON.parse(fs.readFileSync("data/cities.json", 'utf8'));
+        citiesSet.forEach((city) => {
+            city.name = city.name.toLowerCase();
+        });
+
+        // Cities Acronyms and other names
+        var citiesAcronyms = JSON.parse(fs.readFileSync("data/citiesAcronyms.json", 'utf8'));
+
+        // Iterate through lastData and citiesAcronyms to handle acronyms
+        Object.keys(lastData).forEach(city => {
+            for (var keyCity in citiesAcronyms) {
+                if (citiesAcronyms[keyCity].includes(city)) {
+                    if (lastData[keyCity] === undefined) {
+                        lastData[keyCity] = lastData[city];
+                    }
+                    else {
+                        lastData[keyCity].count += lastData[city].count;
+                    }
+                    delete lastData[city];
+                }
+            }
+        });
+
         // Iterate over lastData cities
         Promise.all(Object.keys(lastData).map(city => {
             return new Promise((resolve, reject) => {
-                // Check if city is allready in db
-                City.findOne({ name: city }, (err, cityDb) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        if (!cityDb) {
-                            // Create new city
-                            var newCity = new City({
-                                name: city,
-                            });
-                            // Save new city
-                            newCity.save()
-                            .then(() => { // If saved, add to db
-                                resolve(newCity.name);
-                            })
-                            .catch(err => {
-                                reject(err);
-                            });
+                // Check if city is valid
+                var cityInSet = citiesSet.find(c => c.name === city);
+                if (cityInSet) {
+                    console.log(cityInSet);
+                    // Check if city is allready in db
+                    City.findOne({ name: city }, (err, cityDb) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            if (!cityDb) {
+                                // Create new city
+                                var newCity = new City({
+                                    name: city,
+                                    latitude: cityInSet.lat,
+                                    longitude: cityInSet.lng,
+                                });
+                                // Save new city
+                                newCity.save()
+                                .then(() => { // If saved, add to db
+                                    resolve(newCity.name);
+                                })
+                                .catch(err => {
+                                    reject(err);
+                                });
+                            }
+                            else {
+                                resolve(city);
+                            }
                         }
-                        else {
-                            resolve(city);
-                        }
-                    }
-                });
+                    });
+                } else {
+                    resolve();
+                }
             });
         }))
         .then((cities) => {
@@ -166,10 +199,10 @@ function addNewData(lastData, validCities) {
         Promise.all(validCities.map(city => {
             return new Promise((resolve, reject) => {
                 // Find city in db
-                city.findOne({ name: city })
+                City.findOne({ name: city })
                 .then(cityDb => {
                     // Create new cityData
-                    var newCityData = new cityData({
+                    var newCityData = new CityData({
                         city: cityDb._id,
                         percentageOfPopularity: lastData[city].count / totalCount * 100,
                     });
@@ -206,11 +239,23 @@ function main() {
     mongoose.connect('mongodb://localhost:27017/worldwhere', { useNewUrlParser: true });
 
     // Fetch last data
-    /*
     fetchLastData()
     .then(lastData => {
+        var lastData = {
+            "kiev": {
+                "count": 11
+            },
+            "moscow": {
+                "count": 3
+            },
+            "london": {
+                "count": 1
+            },
+        }
+        console.log(lastData);
         handleCities(lastData) // Handle cities
         .then(validCities => {
+            console.log(validCities);
             addNewData(lastData, validCities) // Add New Data
             .then((citiesData) => {
                 console.log("///////////////////// All done");
@@ -224,10 +269,6 @@ function main() {
             console.log(err);
         });
     });
-    */
-
-    var cities = JSON.parse(fs.readFileSync('data/cities.json', 'utf8'))
-    console.log(cities);
 }
 
 
