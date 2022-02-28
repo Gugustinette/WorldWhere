@@ -19,13 +19,18 @@ export default {
 
 <style lang="scss">
 :root {
-  --primary: #42b983;
-  --secondary: #2c3e50;
+  --primary: #2f3542;
+  --white: #ffffff;
 
-  --background: #f5f5f5;
-  --surface: rgb(206, 206, 206);
+  --green: #2ed573;
+  --red: #e74c3c;
+  --violet: #7b61ff;
 
-  --font: #333;
+  --font-on-primary: #ffffff;
+  --font-on-background: #2f3542;
+
+  --border-radius: 6px;
+  --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
 * {

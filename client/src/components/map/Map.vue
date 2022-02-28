@@ -34,7 +34,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .map {
-  width: 100vw;
+  width: 100%;
   min-height: 600px;
 }
 </style>
