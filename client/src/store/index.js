@@ -9,7 +9,7 @@ export default createStore({
       // Return popularity data by countries
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/country/getByCountries`)
+          .get(`/country/getByCountries`)
           .then((response) => {
             resolve(response.data);
           })
@@ -23,7 +23,7 @@ export default createStore({
       return new Promise((resolve, reject) => {
         // Find in public folder
         axios
-          .get(`http://localhost:8080/countries.geojson`)
+          .get(`https://gugustinette.com/countries.geojson`)
           .then((response) => {
             resolve(response.data);
           })
@@ -36,7 +36,7 @@ export default createStore({
       // Return popularity data by cities
       return new Promise((resolve, reject) => {
         axios
-          .get(`/api/region/getByCities`)
+          .get(`/region/getByCities`)
           .then((response) => {
             resolve(response.data);
           })

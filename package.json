@@ -7,6 +7,7 @@
     "start": "node index.js",
     "server": "node server/bin/app.js",
     "client": "./scripts/serveClient.sh",
+    "build:client": "./scripts/buildClient.sh",
     "ner-install": "./scripts/ner-install.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
