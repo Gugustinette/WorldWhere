@@ -23,7 +23,7 @@ export default createStore({
       return new Promise((resolve, reject) => {
         // Find in public folder
         axios
-          .get(`https://gugustinette.com/countries.geojson`)
+          .get(`https://worldwhere.fr/countries.geojson`)
           .then((response) => {
             resolve(response.data);
           })
