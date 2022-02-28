@@ -1,6 +1,5 @@
 # GitIgnore
 
 access/TWITTER_KEY.json
-lib
 node_modules
 .DS_Store
