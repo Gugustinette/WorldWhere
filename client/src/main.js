@@ -6,6 +6,6 @@ import store from "./store";
 // Axios configuration
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:3100";
+axios.defaults.baseURL = "http://worldwhere.fr";
 
 createApp(App).use(store).use(router).mount("#app");

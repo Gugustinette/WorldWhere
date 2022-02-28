@@ -56,8 +56,8 @@ app.use(cors(
 ));
 
 // Configure Routes
-app.use('/api/country', countryRouter);
-app.use('/api/region', regionRouter);
+app.use('/country', countryRouter);
+app.use('/region', regionRouter);
 
 // Configure Swagger
 expressJSDocSwagger(app)(options);
