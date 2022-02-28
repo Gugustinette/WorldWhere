@@ -36,7 +36,9 @@ exports.getCities = (req, res, next) => {
                     if (cityData || req.query.full) {
                         citiesWithData.push({
                             city: {
-                                name: city.name
+                                name: city.name,
+                                latitude: city.latitude,
+                                longitude: city.longitude
                             },
                             percentageOfPopularity: cityData ? cityData.percentageOfPopularity : undefined
                         });
