@@ -68,6 +68,7 @@ export default {
         .dispatch("getDataByCountries")
         .then((countries) => {
           countries = countries.data;
+          console.log(countries);
           // Get public GeoJSON data
           this.$store.dispatch("getGeoJSON").then((geoJSON) => {
             // Remove unecessary data
@@ -83,6 +84,7 @@ export default {
                   country.country.name
               );
               if (countryGeoJSON) {
+                countryGeoJSON.popularity = country.percentageOfPopularity;
                 CountriesGeoJSON.features.push(countryGeoJSON);
               }
             });
@@ -97,16 +99,17 @@ export default {
     addCountriesToMap(CountriesGeoJSON) {
       // Add countries to map
       L.geoJSON(CountriesGeoJSON, {
-        style: () => {
+        style: (feature) => {
           return {
             color: "#fff",
             weight: 1,
-            fillColor: "#fff",
-            fillOpacity: 0.5,
+            fillColor: "#f55a42",
+            fillOpacity: feature.popularity / 100 || 0,
           };
         },
         onEachFeature: (feature, layer) => {
           layer.on({
+            /*
             mouseover: (e) => {
               e.target.setStyle({
                 fillOpacity: 0.8,
@@ -117,14 +120,16 @@ export default {
                 fillOpacity: 0.5,
               });
             },
+            */
             click: (e) => {
-              this.MODE_Country = true;
-              this.MODE_Region = false;
-              this.showCountries(e);
+              this.showCountryDetails(e.target.feature);
             },
           });
         },
       }).addTo(this.map);
+    },
+    showCountryDetails(country) {
+      console.log(country);
     },
   },
 };
