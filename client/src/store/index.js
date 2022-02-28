@@ -32,6 +32,19 @@ export default createStore({
           });
       });
     },
+    getDataByCities() {
+      // Return popularity data by cities
+      return new Promise((resolve, reject) => {
+        axios
+          .get(`/api/region/getByCities`)
+          .then((response) => {
+            resolve(response.data);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
   },
   modules: {},
 });

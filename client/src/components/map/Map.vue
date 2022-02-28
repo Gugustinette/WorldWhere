@@ -30,9 +30,13 @@ export default {
     return {
       zoom: 2,
       location: [51.505, -0.09],
-      MODE_Country: true,
+      MODE_Country: false,
       MODE_Region: false,
       map: null,
+      countries: [],
+      countriesLayer: null,
+      cities: [],
+      citiesLayer: null,
     };
   },
   mounted() {
@@ -51,54 +55,71 @@ export default {
       }
     ).addTo(this.map);
 
-    this.getDataByCountries();
+    this.getDataByCities();
+    this.getDataByCountries().then(() => {
+      console.log(this.countries);
+      this.showCountries(this.countries);
+    });
   },
   methods: {
     showCountries() {
+      if (this.MODE_Country) return;
       this.MODE_Country = true;
       this.MODE_Region = false;
+      // Clear map content
+      this.citiesLayer?.clearLayers();
+      // Render countries
+      this.addCountriesToMap(this.countries);
     },
     showRegions() {
+      if (this.MODE_Region) return;
       this.MODE_Country = false;
       this.MODE_Region = true;
+      // Clear map content
+      this.countriesLayer?.clearLayers();
+      // Render countries
+      this.addCitiesToMap(this.cities);
     },
     getDataByCountries() {
-      // Get daya by countries
-      this.$store
-        .dispatch("getDataByCountries")
-        .then((countries) => {
-          countries = countries.data;
-          console.log(countries);
-          // Get public GeoJSON data
-          this.$store.dispatch("getGeoJSON").then((geoJSON) => {
-            // Remove unecessary data
-            var CountriesGeoJSON = {
-              type: "FeatureCollection",
-              features: [],
-            };
+      return new Promise((resolve, reject) => {
+        // Get daya by countries
+        this.$store
+          .dispatch("getDataByCountries")
+          .then((countries) => {
+            countries = countries.data;
+            // Get public GeoJSON data
+            this.$store.dispatch("getGeoJSON").then((geoJSON) => {
+              // Remove unecessary data
+              var CountriesGeoJSON = {
+                type: "FeatureCollection",
+                features: [],
+              };
 
-            countries.forEach((country) => {
-              var countryGeoJSON = geoJSON.features.find(
-                (feature) =>
-                  feature.properties.ADMIN.toLowerCase() ===
-                  country.country.name
-              );
-              if (countryGeoJSON) {
-                countryGeoJSON.popularity = country.percentageOfPopularity;
-                CountriesGeoJSON.features.push(countryGeoJSON);
-              }
+              countries.forEach((country) => {
+                var countryGeoJSON = geoJSON.features.find(
+                  (feature) =>
+                    feature.properties.ADMIN.toLowerCase() ===
+                    country.country.name
+                );
+                if (countryGeoJSON) {
+                  countryGeoJSON.popularity = country.percentageOfPopularity;
+                  CountriesGeoJSON.features.push(countryGeoJSON);
+                }
+              });
+
+              this.countries = CountriesGeoJSON;
+              resolve();
             });
-
-            this.addCountriesToMap(CountriesGeoJSON);
+          })
+          .catch((error) => {
+            console.log(error);
+            reject();
           });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      });
     },
     addCountriesToMap(CountriesGeoJSON) {
       // Add countries to map
-      L.geoJSON(CountriesGeoJSON, {
+      this.countriesLayer = L.geoJSON(CountriesGeoJSON, {
         style: (feature) => {
           return {
             color: "#fff",
@@ -130,6 +151,32 @@ export default {
     },
     showCountryDetails(country) {
       console.log(country);
+    },
+    getDataByCities() {
+      // Get daya by countries
+      this.$store
+        .dispatch("getDataByCities")
+        .then((cities) => {
+          cities = cities.data;
+          this.cities = cities;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    addCitiesToMap(cities) {
+      this.citiesLayer = new L.LayerGroup();
+      // Render circle for each city
+      cities.forEach((city) => {
+        var circle = L.circle([city.city.latitude, city.city.longitude], {
+          color: "#f55a42",
+          fillColor: "#f55a42",
+          fillOpacity: 0.3,
+          radius: city.percentageOfPopularity * 1000,
+        });
+        this.citiesLayer.addLayer(circle);
+        circle.addTo(this.map);
+      });
     },
   },
 };

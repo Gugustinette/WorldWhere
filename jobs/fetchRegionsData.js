@@ -33,7 +33,7 @@ const CityData = require('../server/models/CityData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 20;
+const nbTweets = 100;
 
 
 
@@ -241,17 +241,6 @@ function main() {
     // Fetch last data
     fetchLastData()
     .then(lastData => {
-        var lastData = {
-            "kiev": {
-                "count": 11
-            },
-            "moscow": {
-                "count": 3
-            },
-            "london": {
-                "count": 1
-            },
-        }
         console.log(lastData);
         handleCities(lastData) // Handle cities
         .then(validCities => {
