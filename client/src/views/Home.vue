@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Header />
+    <Header title="Statistiques et visualisation des données" />
     <div class="content">
       <h2>Carte des tendances</h2>
       <Map />
