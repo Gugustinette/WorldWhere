@@ -33,7 +33,7 @@ const CityData = require('../server/models/CityData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 10;
+const nbTweets = 100;
 
 
 
@@ -49,10 +49,12 @@ const nbTweets = 10;
 function fetchLastData() {
     let lastData = {};
     return new Promise((resolveMAIN, rejectMAIN) => {
-        twitterClient.v2.get('tweets/search/recent', { query: 'ukraine', 
-        max_results: nbTweets })
+        // Query Ukraine with nbTweets
+        twitterClient.v2.search("Ukraine", {
+            max_results: nbTweets,
+        })
             .then(result => {
-                var tweets = result.data;
+                var tweets = result.data.data;
 
                 // Make promises for each tweet
                 var tweetsProcess = tweets.map(tweet => {

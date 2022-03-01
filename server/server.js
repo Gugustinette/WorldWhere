@@ -59,6 +59,9 @@ app.use(cors(
 app.use('/country', countryRouter);
 app.use('/region', regionRouter);
 
+// Server static files from /static folder with path /static/*
+app.use('/static', express.static(__dirname + '/static'));
+
 // Configure Swagger
 expressJSDocSwagger(app)(options);
 

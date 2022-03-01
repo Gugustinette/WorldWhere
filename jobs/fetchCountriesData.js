@@ -33,7 +33,7 @@ const CountryData = require('../server/models/CountryData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 10;
+const nbTweets = 100;
 
 
 

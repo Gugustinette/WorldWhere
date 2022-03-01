@@ -1,6 +1,6 @@
 <template>
   <div class="map-container">
-    <div id="map" class="map"></div>
+    <div id="map" class="map" @click="clickOnMap"></div>
     <div class="switch-mode">
       <div
         class="option"
@@ -17,6 +17,10 @@
         Régions
       </div>
     </div>
+    <div class="details" v-if="SHOW_CountryDetails">
+      <h2>{{ this.countryDetailed?.title }}</h2>
+      <p>{{ this.countryDetailed?.percentageOfPopularity }}%</p>
+    </div>
   </div>
 </template>
 
@@ -28,15 +32,17 @@ export default {
   name: "Map",
   data() {
     return {
-      zoom: 2,
-      location: [51.505, -0.09],
+      zoom: 4,
+      location: [47.724544549099676, 31.442523333152366],
       MODE_Country: false,
       MODE_Region: false,
+      SHOW_CountryDetails: false,
       map: null,
       countries: [],
       countriesLayer: null,
       cities: [],
       citiesLayer: null,
+      countryDetailed: {},
     };
   },
   mounted() {
@@ -57,17 +63,23 @@ export default {
 
     this.getDataByCities();
     this.getDataByCountries().then(() => {
-      console.log(this.countries);
       this.showCountries(this.countries);
     });
   },
   methods: {
+    clickOnMap() {
+      this.SHOW_CountryDetails = false;
+    },
     showCountries() {
       if (this.MODE_Country) return;
       this.MODE_Country = true;
       this.MODE_Region = false;
+      this.SHOW_CountryDetails = false;
       // Clear map content
-      this.citiesLayer?.clearLayers();
+      this.citiesLayer?.forEach((layer) => {
+        this.map.removeLayer(layer);
+      });
+      this.citiesLayer = null;
       // Render countries
       this.addCountriesToMap(this.countries);
     },
@@ -75,6 +87,7 @@ export default {
       if (this.MODE_Region) return;
       this.MODE_Country = false;
       this.MODE_Region = true;
+      this.SHOW_CountryDetails = false;
       // Clear map content
       this.countriesLayer?.clearLayers();
       // Render countries
@@ -122,7 +135,7 @@ export default {
       this.countriesLayer = L.geoJSON(CountriesGeoJSON, {
         style: (feature) => {
           return {
-            color: "#fff",
+            color: "#f5f5f5",
             weight: 1,
             fillColor: "#f55a42",
             fillOpacity: feature.popularity / 100 || 0,
@@ -130,27 +143,35 @@ export default {
         },
         onEachFeature: (feature, layer) => {
           layer.on({
-            /*
             mouseover: (e) => {
               e.target.setStyle({
-                fillOpacity: 0.8,
+                // Increase size by 10%
+                weight: 2,
               });
             },
             mouseout: (e) => {
               e.target.setStyle({
-                fillOpacity: 0.5,
+                weight: 1,
               });
             },
-            */
             click: (e) => {
-              this.showCountryDetails(e.target.feature);
+              // Gives country lat lng
+              this.showCountryDetails(e.target.feature, e.latlng);
             },
           });
         },
       }).addTo(this.map);
     },
-    showCountryDetails(country) {
-      console.log(country);
+    showCountryDetails(country, latlng) {
+      // Offset the latlng by 15 in longitude
+      latlng = L.latLng(latlng.lat, latlng.lng + 15);
+      // Move map camera to country
+      this.map.setView(latlng, this.zoom);
+      this.countryDetailed = {
+        title: country.properties.ADMIN,
+        percentageOfPopularity: Math.round(country.popularity, 2),
+      };
+      this.SHOW_CountryDetails = true;
     },
     getDataByCities() {
       // Get daya by countries
@@ -165,7 +186,7 @@ export default {
         });
     },
     addCitiesToMap(cities) {
-      this.citiesLayer = new L.LayerGroup();
+      this.citiesLayer = [];
       // Render circle for each city
       cities.forEach((city) => {
         var circle = L.circle([city.city.latitude, city.city.longitude], {
@@ -174,7 +195,7 @@ export default {
           fillOpacity: 0.3,
           radius: city.percentageOfPopularity * 1000,
         });
-        this.citiesLayer.addLayer(circle);
+        this.citiesLayer.push(circle);
         circle.addTo(this.map);
       });
     },
@@ -223,6 +244,18 @@ export default {
         color: var(--font-on-primary);
       }
     }
+  }
+
+  .details {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    bottom: 10px;
+    width: 300px;
+    background: var(--white-transparent);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    z-index: 1000;
   }
 }
 </style>

@@ -21,6 +21,7 @@ export default {
 :root {
   --primary: #2f3542;
   --white: #ffffff;
+  --white-transparent: rgba(255, 255, 255, 0.9);
 
   --green: #2ed573;
   --red: #e74c3c;
