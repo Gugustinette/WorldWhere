@@ -23,7 +23,8 @@ exports.getCities = (req, res, next) => {
             // Get city data from database (1 hour ago)
             CityData.find({
                 date: {
-                    $gte: new Date(new Date().getTime() - 3600000)
+                    $gte: new Date(new Date().getTime() - 3600000),
+                    $lt: new Date(new Date().getTime())
                 }
             })
             .then(citiesData => {
