@@ -20,11 +20,11 @@ exports.getCities = (req, res, next) => {
     // Get recent data from database
     City.find({})
         .then(cities => {
-            // Get city data from database (1 hour ago)
+            // Get city data from database (1 hour - 2 hour ago)
             CityData.find({
                 date: {
                     $gte: new Date(new Date().getTime() - 3600000 * 2),
-                    $lt: new Date(new Date().getTime() - 0)
+                    $lt: new Date(new Date().getTime() - 3600000)
                 }
             })
             .then(citiesData => {

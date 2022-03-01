@@ -1,4 +1,4 @@
-# World Where 3
+# World Where
 
 ## Introduction
 
@@ -14,6 +14,7 @@ Toutes les 30 secondes, le serveur récupère les 20 tweets récents en lien ave
 - <a href="https://nodejs.org">NodeJS</a> et <a href="https://www.npmjs.com">npm</a>
 - La librairie <a href="https://www.npmjs.com/package/pm2">pm2</a> installée globalement via NPM : `npm install -g pm2`
 - La librairie <a href="https://www.npmjs.com/package/serve">serve</a>, installée globalement vua NPM : `npm install -g serve`
+- <a href="https://www.mongodb.com/try/download/community">MongoDB Community Edition</a> installé et lancé localement
 
 ## Installation
 - Télécharger le projet

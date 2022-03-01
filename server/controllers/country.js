@@ -24,7 +24,7 @@ exports.getCountries = (req, res, next) => {
             CountryData.find({
                 date: {
                     $gte: new Date(new Date().getTime() - 3600000 * 2),
-                    $lt: new Date(new Date().getTime() - 0)
+                    $lt: new Date(new Date().getTime() - 3600000)
                 }
             })
             .then(countriesData => {
