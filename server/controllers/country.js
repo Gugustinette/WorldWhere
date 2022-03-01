@@ -23,8 +23,8 @@ exports.getCountries = (req, res, next) => {
             // Get country data from database (1 hour - 2 hour ago)
             CountryData.find({
                 date: {
-                    $gte: new Date(new Date().getTime() - 3600000),
-                    $lt: new Date(new Date().getTime())
+                    $gte: new Date(new Date().getTime() - 3600000 * 2),
+                    $lt: new Date(new Date().getTime() - 3600000)
                 }
             })
             .then(countriesData => {
