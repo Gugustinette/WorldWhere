@@ -214,10 +214,12 @@ function addNewData(lastData, validCities) {
                             })
                         }
                         else {
+                            var actualDate = new Date();
                             // Create new cityData
                             var newCityData = new CityData({
                                 city: cityDb._id,
                                 // percentageOfPopularity: lastData[city].count / totalCount * 100,
+                                date: new Date(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate(), actualDate.getHours()),
                                 count: lastData[city].count
                             });
                             // Save new cityData

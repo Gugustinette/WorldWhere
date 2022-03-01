@@ -212,9 +212,12 @@ function addNewData(lastData, validCountries) {
                         }
                         else {
                             // Create new countryData
+                            var actualDate = new Date();
                             var newCountryData = new CountryData({
                                 country: countryDb._id,
                                 // percentageOfPopularity: lastData[country].count / totalCount * 100,
+                                // Set date to actual hour
+                                date: new Date(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate(), actualDate.getHours()),
                                 count: lastData[country].count
                             });
                             // Save new CountryData
