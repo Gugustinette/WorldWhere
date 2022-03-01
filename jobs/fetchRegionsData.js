@@ -33,7 +33,7 @@ const CityData = require('../server/models/CityData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 100;
+const nbTweets = 10;
 
 
 
