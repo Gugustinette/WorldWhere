@@ -24,7 +24,7 @@ exports.getCities = (req, res, next) => {
             CityData.find({
                 date: {
                     $gte: new Date(new Date().getTime() - 3600000 * 2),
-                    $lt: new Date(new Date().getTime() - 3600000)
+                    $lt: new Date(new Date().getTime() - 0)
                 }
             })
             .then(citiesData => {
@@ -48,6 +48,7 @@ exports.getCities = (req, res, next) => {
 
                 res.status(200).json({
                     data: citiesWithData,
+                    lastDataUpdate: citiesData[0] ? citiesData[0].date : undefined
                 })
             })
             .catch(err => {

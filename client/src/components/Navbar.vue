@@ -47,7 +47,7 @@ nav {
 
   .links {
     height: 100%;
-    display: flex;
+    display: none;
     flex-direction: row;
     margin-right: 20px;
 

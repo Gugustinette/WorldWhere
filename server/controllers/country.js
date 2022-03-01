@@ -24,7 +24,7 @@ exports.getCountries = (req, res, next) => {
             CountryData.find({
                 date: {
                     $gte: new Date(new Date().getTime() - 3600000 * 2),
-                    $lt: new Date(new Date().getTime() - 3600000)
+                    $lt: new Date(new Date().getTime() - 0)
                 }
             })
             .then(countriesData => {
@@ -46,6 +46,7 @@ exports.getCountries = (req, res, next) => {
 
                 res.status(200).json({
                     data: countriesWithData,
+                    lastDataUpdate: countriesData[0] ? countriesData[0].date : undefined
                 })
             })
             .catch(err => {

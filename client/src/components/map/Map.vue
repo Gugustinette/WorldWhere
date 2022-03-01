@@ -1,26 +1,29 @@
 <template>
-  <div class="map-container">
-    <div id="map" class="map" @click="clickOnMap"></div>
-    <div class="switch-mode">
-      <div
-        class="option"
-        v-bind:class="{ active: this.MODE_Country }"
-        @click="showCountries"
-      >
-        Pays
+  <div class="map-wrapper">
+    <div class="map-container">
+      <div id="map" class="map" @click="clickOnMap"></div>
+      <div class="switch-mode">
+        <div
+          class="option"
+          v-bind:class="{ active: this.MODE_Country }"
+          @click="showCountries"
+        >
+          Pays
+        </div>
+        <div
+          class="option"
+          v-bind:class="{ active: this.MODE_Region }"
+          @click="showRegions"
+        >
+          Régions
+        </div>
       </div>
-      <div
-        class="option"
-        v-bind:class="{ active: this.MODE_Region }"
-        @click="showRegions"
-      >
-        Régions
+      <div class="details" v-if="SHOW_CountryDetails">
+        <h2>{{ this.countryDetailed?.title }}</h2>
+        <p>{{ this.countryDetailed?.percentageOfPopularity }}%</p>
       </div>
     </div>
-    <div class="details" v-if="SHOW_CountryDetails">
-      <h2>{{ this.countryDetailed?.title }}</h2>
-      <p>{{ this.countryDetailed?.percentageOfPopularity }}%</p>
-    </div>
+    <p>Dernière mise à jour des données : {{ this.lastDataUpdate }}</p>
   </div>
 </template>
 
@@ -43,6 +46,9 @@ export default {
       cities: [],
       citiesLayer: null,
       countryDetailed: {},
+      lastDataUpdate: "",
+      lastDataUpdateCountry: "",
+      lastDataUpdateRegion: "",
     };
   },
   mounted() {
@@ -70,6 +76,24 @@ export default {
     clickOnMap() {
       this.SHOW_CountryDetails = false;
     },
+    // Convert date to be displayed
+    convertDateToDisplay(date) {
+      // Return date to format : "dd/mm/yyyy - hh:mm"
+      // Handle time zone
+      let dateTime = new Date(date);
+      let hours = dateTime.getHours();
+      let minutes = dateTime.getMinutes();
+      let ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      let strTime = hours + ":" + minutes + " " + ampm;
+      let day = dateTime.getDate();
+      let month = dateTime.getMonth() + 1;
+      let year = dateTime.getFullYear();
+      return day + "/" + month + "/" + year + " - " + strTime;
+    },
+    // Show countries
     showCountries() {
       if (this.MODE_Country) return;
       this.MODE_Country = true;
@@ -82,7 +106,9 @@ export default {
       this.citiesLayer = null;
       // Render countries
       this.addCountriesToMap(this.countries);
+      this.lastDataUpdate = this.lastDataUpdateCountry;
     },
+    // Show regions
     showRegions() {
       if (this.MODE_Region) return;
       this.MODE_Country = false;
@@ -92,13 +118,18 @@ export default {
       this.countriesLayer?.clearLayers();
       // Render countries
       this.addCitiesToMap(this.cities);
+      this.lastDataUpdate = this.lastDataUpdateRegion;
     },
+    // Load countries
     getDataByCountries() {
       return new Promise((resolve, reject) => {
         // Get daya by countries
         this.$store
           .dispatch("getDataByCountries")
           .then((countries) => {
+            this.lastDataUpdateCountry = this.convertDateToDisplay(
+              countries.lastDataUpdate
+            );
             countries = countries.data;
             // Get public GeoJSON data
             this.$store.dispatch("getGeoJSON").then((geoJSON) => {
@@ -130,6 +161,7 @@ export default {
           });
       });
     },
+    // Add countries to map
     addCountriesToMap(CountriesGeoJSON) {
       // Add countries to map
       this.countriesLayer = L.geoJSON(CountriesGeoJSON, {
@@ -161,7 +193,9 @@ export default {
           });
         },
       }).addTo(this.map);
+      this.lastDataUpdate = this.lastDataUpdateCountry;
     },
+    // Show country details
     showCountryDetails(country, latlng) {
       // Offset the latlng by 15 in longitude
       latlng = L.latLng(latlng.lat, latlng.lng + 15);
@@ -173,11 +207,15 @@ export default {
       };
       this.SHOW_CountryDetails = true;
     },
+    // Load cities
     getDataByCities() {
       // Get daya by countries
       this.$store
         .dispatch("getDataByCities")
         .then((cities) => {
+          this.lastDataUpdateRegion = this.convertDateToDisplay(
+            cities.lastDataUpdate
+          );
           cities = cities.data;
           this.cities = cities;
         })
@@ -185,6 +223,7 @@ export default {
           console.log(error);
         });
     },
+    // Add cities to map
     addCitiesToMap(cities) {
       this.citiesLayer = [];
       // Render circle for each city
@@ -205,9 +244,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.map-container {
+.map-wrapper {
   width: 100%;
   min-height: 600px;
+
+  p {
+    margin-top: 2px;
+    width: 100%;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+}
+
+.map-container {
+  width: 100%;
+  min-height: inherit;
   position: relative;
 
   .map {

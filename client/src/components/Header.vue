@@ -6,7 +6,7 @@
         <div class="bar"></div>
         <div class="content">
           <h2>{{ this.title }}</h2>
-          <p>{{ this.content }}</p>
+          <p v-html="this.content"></p>
         </div>
       </div>
     </div>

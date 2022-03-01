@@ -51,6 +51,7 @@ export default {
 }
 
 a {
-  color: var(--primary);
+  color: var(--green);
+  text-decoration: none;
 }
 </style>

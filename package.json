@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "./scripts/launch.sh",
     "server": "node server/bin/app.js",
+    "schedule": "node index.js",
     "client": "./scripts/serveClient.sh",
     "build:client": "./scripts/buildClient.sh",
     "ner-install": "./scripts/ner-install.sh",
