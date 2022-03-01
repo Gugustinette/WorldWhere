@@ -7,8 +7,8 @@ import store from "./store";
 import axios from "axios";
 
 // Production
-// axios.defaults.baseURL = "https://worldwhere.fr/api";
+axios.defaults.baseURL = "https://worldwhere.fr/api";
 // Development
-axios.defaults.baseURL = "http://localhost:3100";
+// axios.defaults.baseURL = "http://localhost:3100";
 
 createApp(App).use(store).use(router).mount("#app");
