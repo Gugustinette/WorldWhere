@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
  * @property {string} city - The id of the corresponding city
  * @property {string} date - The date of the corresponding data
  * @property {number} percentageOfPopularity - The percentage of Popularity of the city on the corresponding date
+ * @property {number} count - Times the corresponding city has been mentioned
  */
 const cityDataSchema = new mongoose.Schema({
     city: {
@@ -26,8 +27,10 @@ const cityDataSchema = new mongoose.Schema({
         default: Date.now
     },
     percentageOfPopularity: {
-        type: Number,
-        required: true
+        type: Number
+    },
+    count: {
+        type: Number
     },
 });
 

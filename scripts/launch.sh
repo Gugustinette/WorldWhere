@@ -1,5 +1,9 @@
 # Launch the whole project
 # Script should be run from root folder
 
-pm2 start npm --name "WorldWhere-Server" -- run "server"
-pm2 start npm --name "WorldWhere-Client" -- run "build:client"
+# Client & Server
+pm2 start npm --name "WW-Server" -- run "server"
+pm2 start npm --name "WW-Client" -- run "build:client"
+
+# Schedule - Data Updater
+pm2 --name "WW-Schedule" start npm -- start

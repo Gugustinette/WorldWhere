@@ -33,7 +33,7 @@ const CountryData = require('../server/models/CountryData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 100;
+const nbTweets = 10;
 
 
 
@@ -186,27 +186,46 @@ function handleCountries(lastData) {
  */
 function addNewData(lastData, validCountries) {
     return new Promise((resolveMAIN, rejectMAIN) => {
-        // Iterate over validCountries to calculate the total count
-        var totalCount = 0;
-        validCountries.forEach(country => {
-            totalCount += lastData[country].count;
-        });
-
         // Iterate over countries
         Promise.all(validCountries.map(country => {
             return new Promise((resolve, reject) => {
                 // Find country in db
                 Country.findOne({ name: country })
                 .then(countryDb => {
-                    // Create new countryData
-                    var newCountryData = new CountryData({
-                        country: countryDb._id,
-                        percentageOfPopularity: lastData[country].count / totalCount * 100,
-                    });
-                    // Save new CountryData
-                    newCountryData.save()
-                    .then(() => {
-                        resolve(newCountryData);
+                    // Find CountryData 1 hour ago maximum
+                    CountryData.findOne({
+                        date: {
+                            $gte: new Date(new Date().getTime() - 3600000)
+                        },
+                        country: countryDb._id
+                    })
+                    .then(countryData => {
+                        if (countryData) {
+                            countryData.count += lastData[country].count
+                            countryData.save()
+                            .then(() => {
+                                resolve(countryData);
+                            })
+                            .catch(err => {
+                                reject(err);
+                            });
+                        }
+                        else {
+                            // Create new countryData
+                            var newCountryData = new CountryData({
+                                country: countryDb._id,
+                                // percentageOfPopularity: lastData[country].count / totalCount * 100,
+                                count: lastData[country].count
+                            });
+                            // Save new CountryData
+                            newCountryData.save()
+                            .then(() => {
+                                resolve(newCountryData);
+                            })
+                            .catch(err => {
+                                reject(err);
+                            });
+                        }
                     })
                     .catch(err => {
                         reject(err);
@@ -221,6 +240,49 @@ function addNewData(lastData, validCountries) {
         .catch(err => {
             rejectMAIN(err);
         });
+    });
+}
+
+/**
+ * Calculate the percentage of each CountryData in the last hour
+ * @returns {Promise} - A promise
+ */
+function calculatePercentage() {
+    return new Promise((resolveMAIN, rejectMAIN) => {
+        CountryData.find({
+            date: {
+                $gte: new Date(new Date().getTime() - 3600000)
+            },
+        })
+        .then(countriesData => {
+            // Total Count
+            var totalCount = 0;
+            countriesData.forEach(countryData => {
+                totalCount += countryData.count
+            });
+
+            Promise.all(countriesData.map(countryData => {
+                return new Promise((resolve, reject) => {
+                    countryData.percentageOfPopularity = countryData.count / totalCount * 100;
+                    countryData.save()
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch(err => {
+                        reject(err);
+                    });
+                })
+            }))
+            .then(() => {
+                resolveMAIN();
+            })
+            .catch((err) => {
+                rejectMAIN(err);
+            })
+        })
+        .catch(err => {
+            rejectMAIN(err);
+        })
     });
 }
 
@@ -242,8 +304,14 @@ function main() {
         .then(validCountries => {
             addNewData(lastData, validCountries) // Add New Data
             .then((countriesData) => {
-                console.log("///////////////////// All done");
-                mongoose.disconnect();
+                calculatePercentage()
+                .then(() => {
+                    console.log("///////////////////// Countries - Done : ", new Date().toLocaleString());
+                    mongoose.disconnect();
+                })
+                .catch(err => {
+                    console.log(err);
+                })
             })
             .catch(err => {
                 console.log(err);

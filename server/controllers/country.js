@@ -20,7 +20,7 @@ exports.getCountries = (req, res, next) => {
     // Get recent data from database
     Country.find({})
         .then(countries => {
-            // Get country data from database (1 hour ago)
+            // Get country data from database (1 hour - 2 hour ago)
             CountryData.find({
                 date: {
                     $gte: new Date(new Date().getTime() - 3600000)

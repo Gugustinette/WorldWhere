@@ -33,7 +33,7 @@ const CityData = require('../server/models/CityData');
 const fs = require('fs');
 
 // Config
-const nbTweets = 100;
+const nbTweets = 10;
 
 
 
@@ -141,7 +141,6 @@ function handleCities(lastData) {
                 // Check if city is valid
                 var cityInSet = citiesSet.find(c => c.name === city);
                 if (cityInSet) {
-                    console.log(cityInSet);
                     // Check if city is allready in db
                     City.findOne({ name: city }, (err, cityDb) => {
                         if (err) {
@@ -191,31 +190,49 @@ function handleCities(lastData) {
  */
 function addNewData(lastData, validCities) {
     return new Promise((resolveMAIN, rejectMAIN) => {
-        // Iterate over validcities to calculate the total count
-        var totalCount = 0;
-        validCities.forEach(city => {
-            totalCount += lastData[city].count;
-        });
-
         // Iterate over cities
         Promise.all(validCities.map(city => {
             return new Promise((resolve, reject) => {
                 // Find city in db
                 City.findOne({ name: city })
                 .then(cityDb => {
-                    // Create new cityData
-                    var newCityData = new CityData({
-                        city: cityDb._id,
-                        percentageOfPopularity: lastData[city].count / totalCount * 100,
-                    });
-                    // Save new cityData
-                    newCityData.save()
-                    .then(() => {
-                        resolve(newCityData);
+                    CityData.findOne({
+                        date: {
+                            $gte: new Date(new Date().getTime() - 3600000)
+                        },
+                        city: cityDb._id
+                    })
+                    .then(cityData => {
+                        if (cityData) {
+                            cityData.count += lastData[city].count;
+                            cityData.save()
+                            .then(() => {
+                                resolve(cityData);
+                            })
+                            .catch(err => {
+                                reject(err);
+                            })
+                        }
+                        else {
+                            // Create new cityData
+                            var newCityData = new CityData({
+                                city: cityDb._id,
+                                // percentageOfPopularity: lastData[city].count / totalCount * 100,
+                                count: lastData[city].count
+                            });
+                            // Save new cityData
+                            newCityData.save()
+                            .then(() => {
+                                resolve(newCityData);
+                            })
+                            .catch(err => {
+                                reject(err);
+                            });
+                        }
                     })
                     .catch(err => {
                         reject(err);
-                    });
+                    })
                 });
             });
         }))
@@ -229,6 +246,48 @@ function addNewData(lastData, validCities) {
     });
 }
 
+/**
+ * Calculate the percentage of each CityData in the last hour
+ * @returns {Promise} - A promise
+ */
+function calculatePercentage() {
+    return new Promise((resolveMAIN, rejectMAIN) => {
+        CityData.find({
+            date: {
+                $gte: new Date(new Date().getTime() - 3600000)
+            },
+        })
+        .then(citiesData => {
+            // Total Count
+            var totalCount = 0;
+            citiesData.forEach(cityData => {
+                totalCount += cityData.count
+            });
+
+            Promise.all(citiesData.map(cityData => {
+                return new Promise((resolve, reject) => {
+                    cityData.percentageOfPopularity = cityData.count / totalCount * 100;
+                    cityData.save()
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch(err => {
+                        reject(err);
+                    });
+                })
+            }))
+            .then(() => {
+                resolveMAIN();
+            })
+            .catch((err) => {
+                rejectMAIN(err);
+            })
+        })
+        .catch(err => {
+            rejectMAIN(err);
+        })
+    });
+}
 
 
 
@@ -243,14 +302,20 @@ function main() {
     // Fetch last data
     fetchLastData()
     .then(lastData => {
-        console.log(lastData);
+        // console.log(lastData);
         handleCities(lastData) // Handle cities
         .then(validCities => {
-            console.log(validCities);
+            // console.log(validCities);
             addNewData(lastData, validCities) // Add New Data
             .then((citiesData) => {
-                console.log("///////////////////// All done");
-                mongoose.disconnect();
+                calculatePercentage()
+                .then(() => {
+                    console.log("///////////////////// Regions - Done : ", new Date().toLocaleString());
+                    mongoose.disconnect();
+                })
+                .catch(err => {
+                    console.log(err);
+                })
             })
             .catch(err => {
                 console.log(err);
