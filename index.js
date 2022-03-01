@@ -17,10 +17,8 @@ const breeCountries = new Bree({
         // Run fetchCountriesData and fetchRegionsData job every 30 seconds
         { name: 'fetchCountriesData', interval: `${TimeBetweenUpdate}s` },
 
-        /*
-        // Run clean logs job At 02:17 AM on Sunday (with cron schedule)
-        { name: 'clean-logs', cron: '17 2 * * 0' }
-        */
+        // Run summarizeCountryData job every day at 00:00:00
+        { name: 'summarizeCountryData', cron: '0 0 * * *' },
     ]
 });
 
@@ -30,6 +28,9 @@ const breeRegions = new Bree({
 
         // Run fetchRegionsData job every 30 seconds
         { name: 'fetchRegionsData', interval: `${TimeBetweenUpdate}s` },
+
+        // Run summarizeRegionData job every day at 00:05:00
+        { name: 'summarizeRegionData', cron: '0 5 * * *' },
     ]
 });
 
@@ -41,3 +42,4 @@ breeCountries.start();
 setTimeout(() => {
     breeRegions.start();
 }, OffsetBeforeStart * 1000);
+
