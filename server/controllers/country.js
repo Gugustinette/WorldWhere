@@ -12,8 +12,6 @@ const CountryData = require('../models/CountryData');
 
 /**
  * Get Countries - Get countries from database
- * @param {*} req.query.dateStart date of the data
- * @param {*} req.query.dateEnd date of the data
  * @param {*} req.query.full if true, return all countries, else return only the countries with data
  */
 exports.getCountries = (req, res, next) => {
@@ -63,3 +61,41 @@ exports.getCountries = (req, res, next) => {
         });
 }
 
+/**
+ * Get Country - Get a specific country from database
+ * @param {*} req.query.countryId Id of the country
+ * @param {*} req.query.dateStart date of the data
+ * @param {*} req.query.dateEnd date of the data
+*/
+exports.getCountryData = (req, res, next) => {
+    // Get country data from database
+    CountryData.find({
+        country: req.query.countryId,
+        date: {
+            $gte: req.query.dateStart ? new Date(req.query.dateStart) : "2000-01-01",
+            $lt: req.query.dateEnd ? new Date(req.query.dateEnd) : new Date()
+        }
+    })
+    .then(countryDataList => {
+        countryDataToReturn = [];
+        countryDataList.forEach(countryData => {
+            countryDataToReturn.push({
+                _id: countryData._id,
+                date: countryData.date,
+                percentageOfPopularity: countryData.percentageOfPopularity,
+                count: countryData.count
+            });
+        });
+
+        res.status(200).json({
+            data: countryDataToReturn,
+            country: req.query.countryId
+        });
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: 'Failed to get country data',
+            error: err
+        });
+    });
+}
