@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "axios": "^0.26.0",
+    "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
+    "epic-spinners": "^1.1.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"

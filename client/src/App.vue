@@ -48,6 +48,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: var(--font);
+  overflow-x: hidden;
 }
 
 a {

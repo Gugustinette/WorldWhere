@@ -20,7 +20,17 @@
       </div>
       <div class="details" v-if="SHOW_CountryDetails">
         <h2>{{ this.countryDetailed?.title }}</h2>
-        <p>{{ this.countryDetailed?.percentageOfPopularity }}%</p>
+        <p>
+          {{ this.countryDetailed?.percentageOfPopularity }}% de popularité la
+          dernière heure.<br />
+          Voir tweets récents :
+          <a
+            v-bind:href="
+              'https://twitter.com/search?q=' + this.countryDetailed?.title
+            "
+            >Twitter</a
+          >
+        </p>
       </div>
     </div>
     <p>Dernière mise à jour des données : {{ this.lastDataUpdate }}</p>
@@ -299,10 +309,10 @@ export default {
 
   .details {
     position: absolute;
-    right: 10px;
-    top: 10px;
-    bottom: 10px;
-    width: 300px;
+    right: 30px;
+    top: 30px;
+    width: 250px;
+    padding: 20px;
     background: var(--white-transparent);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);

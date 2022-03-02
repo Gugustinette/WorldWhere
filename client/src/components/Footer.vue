@@ -81,7 +81,8 @@ footer {
       width: 100%;
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
       align-items: flex-start;
 
       h2 {
