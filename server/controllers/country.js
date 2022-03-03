@@ -69,10 +69,11 @@ exports.getCountries = (req, res, next) => {
 */
 exports.getCountryData = (req, res, next) => {
     // Get country data from database
+    // By default get last 24 hours of data
     CountryData.find({
         country: req.query.countryId,
         date: {
-            $gte: req.query.dateStart ? new Date(req.query.dateStart) : "2000-01-01",
+            $gte: req.query.dateStart ? new Date(req.query.dateStart) : new Date(new Date().getTime() - 3600000 * 24),
             $lt: req.query.dateEnd ? new Date(req.query.dateEnd) : new Date()
         }
     })

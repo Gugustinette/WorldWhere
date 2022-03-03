@@ -75,7 +75,7 @@ exports.getCityData = (req, res, next) => {
     CityData.find({
         city: req.query.cityId,
         date: {
-            $gte: req.query.dateStart ? new Date(req.query.dateStart) : "2000-01-01",
+            $gte: req.query.dateStart ? new Date(req.query.dateStart) : new Date(new Date().getTime() - 3600000 * 24),
             $lt: req.query.dateEnd ? new Date(req.query.dateEnd) : new Date()
         }
     })

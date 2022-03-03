@@ -39,6 +39,7 @@ export default {
         // Initialize the dataset
         this.datasets.push({
           label: "Pourcentage de popularité",
+          type: "line",
           data: countryDataList.map(
             (countryData) => countryData.percentageOfPopularity
           ),
