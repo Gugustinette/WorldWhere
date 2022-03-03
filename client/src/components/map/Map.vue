@@ -1,6 +1,13 @@
 <template>
   <div class="map-wrapper">
-    <div class="map-container">
+    <div class="loading-wrapper" v-if="this.isLoading">
+      <half-circle-spinner
+        :animation-duration="1000"
+        :size="60"
+        :color="'var(--green)'"
+      />
+    </div>
+    <div class="map-container" v-bind:class="{ hidden: this.isLoading }">
       <div id="map" class="map" @click="clickOnMap"></div>
       <div class="switch-mode">
         <div
@@ -18,47 +25,57 @@
           Régions
         </div>
       </div>
-      <div class="details" v-if="SHOW_CountryDetails">
-        <h2>{{ this.countryDetailed?.title }}</h2>
+      <div class="details" v-if="SHOW_Details">
+        <h2>{{ this.elementDetailed?.title }}</h2>
         <p>
-          {{ this.countryDetailed?.percentageOfPopularity }}% de popularité la
+          {{ this.elementDetailed?.percentageOfPopularity }}% de popularité la
           dernière heure.<br />
           Voir tweets récents :
           <a
             v-bind:href="
-              'https://twitter.com/search?q=' + this.countryDetailed?.title
+              'https://twitter.com/search?q=' + this.elementDetailed?.title
             "
             >Twitter</a
           >
         </p>
       </div>
     </div>
-    <p>Dernière mise à jour des données : {{ this.lastDataUpdate }}</p>
+    <p v-bind:class="{ hidden: this.isLoading }">
+      Dernière mise à jour des données : {{ this.lastDataUpdate }}
+    </p>
   </div>
 </template>
 
 <script>
+// Library
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
+// Components
+import { HalfCircleSpinner } from "epic-spinners";
+
 export default {
   name: "Map",
+  components: {
+    HalfCircleSpinner,
+  },
   data() {
     return {
       zoom: 4,
       location: [47.724544549099676, 31.442523333152366],
       MODE_Country: false,
       MODE_Region: false,
-      SHOW_CountryDetails: false,
+      SHOW_Details: false,
       map: null,
       countries: [],
       countriesLayer: null,
       cities: [],
       citiesLayer: null,
-      countryDetailed: {},
+      elementDetailed: {},
       lastDataUpdate: "",
       lastDataUpdateCountry: "",
       lastDataUpdateRegion: "",
+      isLoading: true,
     };
   },
   mounted() {
@@ -79,12 +96,13 @@ export default {
 
     this.getDataByCities();
     this.getDataByCountries().then(() => {
-      this.showCountries(this.countries);
+      this.showCountries();
+      this.isLoading = false;
     });
   },
   methods: {
     clickOnMap() {
-      this.SHOW_CountryDetails = false;
+      this.SHOW_Details = false;
     },
     // Convert date to be displayed
     convertDateToDisplay(date) {
@@ -108,7 +126,7 @@ export default {
       if (this.MODE_Country) return;
       this.MODE_Country = true;
       this.MODE_Region = false;
-      this.SHOW_CountryDetails = false;
+      this.SHOW_Details = false;
       // Clear map content
       this.citiesLayer?.forEach((layer) => {
         this.map.removeLayer(layer);
@@ -123,7 +141,7 @@ export default {
       if (this.MODE_Region) return;
       this.MODE_Country = false;
       this.MODE_Region = true;
-      this.SHOW_CountryDetails = false;
+      this.SHOW_Details = false;
       // Clear map content
       this.countriesLayer?.clearLayers();
       // Render countries
@@ -198,24 +216,29 @@ export default {
             },
             click: (e) => {
               // Gives country lat lng
-              this.showCountryDetails(e.target.feature, e.latlng);
+              this.zoom = 4;
+              this.showElementDetails(
+                e.target.feature.properties.ADMIN,
+                e.target.feature.popularity,
+                e.latlng
+              );
             },
           });
         },
       }).addTo(this.map);
       this.lastDataUpdate = this.lastDataUpdateCountry;
     },
-    // Show country details
-    showCountryDetails(country, latlng) {
+    // Show element details
+    showElementDetails(elementName, popularity, latlng) {
       // Offset the latlng by 15 in longitude
-      latlng = L.latLng(latlng.lat, latlng.lng + 15);
-      // Move map camera to country
+      latlng = L.latLng(latlng.lat, latlng.lng);
+      // Move map camera to the element location
       this.map.setView(latlng, this.zoom);
-      this.countryDetailed = {
-        title: country.properties.ADMIN,
-        percentageOfPopularity: Math.round(country.popularity, 2),
+      this.elementDetailed = {
+        title: elementName,
+        percentageOfPopularity: Math.round(popularity, 2),
       };
-      this.SHOW_CountryDetails = true;
+      this.SHOW_Details = true;
     },
     // Load cities
     getDataByCities() {
@@ -242,9 +265,18 @@ export default {
           color: "#f55a42",
           fillColor: "#f55a42",
           fillOpacity: 0.3,
-          radius: city.percentageOfPopularity * 1000,
+          radius: city.percentageOfPopularity * 1000 * 4,
         });
         this.citiesLayer.push(circle);
+        circle.addEventListener("click", (e) => {
+          this.zoom = 6;
+          // Make the first letter of the city name uppercase
+          this.showElementDetails(
+            city.city.name.charAt(0).toUpperCase() + city.city.name.slice(1),
+            city.percentageOfPopularity,
+            e.latlng
+          );
+        });
         circle.addTo(this.map);
       });
     },
@@ -255,8 +287,20 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .map-wrapper {
+  position: relative;
   width: 100%;
   min-height: 600px;
+
+  .loading-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+  }
 
   p {
     margin-top: 2px;
@@ -318,5 +362,8 @@ export default {
     box-shadow: var(--box-shadow);
     z-index: 1000;
   }
+}
+.hidden {
+  visibility: hidden;
 }
 </style>

@@ -47,6 +47,14 @@ export default {
           borderColor: "#36495d",
           borderWidth: 3,
         });
+        this.datasets.push({
+          label: "Nombre d'occurences du terme",
+          type: "line",
+          data: countryDataList.map((countryData) => countryData.count),
+          backgroundColor: "#43c278ad",
+          borderColor: "#30794e",
+          borderWidth: 3,
+        });
         this.labels = countryDataList.map((countryData) => {
           // Display hours and minutes
           var date = new Date(countryData.date);
