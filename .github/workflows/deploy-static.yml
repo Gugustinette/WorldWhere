@@ -27,7 +27,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: /static/client/build
+          path: /static/client/dist
   # Deployment job
   deploy:
     # Add a dependency to the build job
