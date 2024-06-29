@@ -1,13 +1,13 @@
 <template>
   <nav>
     <div class="logo">
-      <router-link to="/">
-        <img src="/ww3_logo_full_transparent.png" alt="Logo" />
+      <router-link to="/WorldWhere">
+        <img src="/WorldWhere/ww3_logo_full_transparent.png" alt="Logo" />
       </router-link>
     </div>
     <div class="links">
-      <router-link to="/">Accueil</router-link>
-      <router-link to="/about">À propos</router-link>
+      <router-link to="/WorldWhere">Accueil</router-link>
+      <router-link to="/WorldWhere/about">À propos</router-link>
     </div>
   </nav>
 </template>
