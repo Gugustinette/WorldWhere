@@ -7,6 +7,11 @@ on:
     branches:
       - master
 
+# Change default directory
+defaults:
+  run:
+    working-directory: ./static/client
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,8 +21,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "16"
-      # Move to the directory where the code is located
-      - run: cd ./static/client
       # Pick your own package manager and build script
       - run: npm install --force
       - run: npm run build
