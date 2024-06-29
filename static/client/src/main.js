@@ -7,7 +7,7 @@ import store from "./store";
 import axios from "axios";
 
 // Production
-axios.defaults.baseURL = "https://worldwhere.fr";
+axios.defaults.baseURL = "https://gugustinette.github.io/WorldWhere/";
 // Development
 // axios.defaults.baseURL = "http://localhost:9090";
 
