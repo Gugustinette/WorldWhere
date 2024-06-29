@@ -1,0 +1,27 @@
+{
+  "name": "worldwhere-static",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./scripts/launch.sh",
+    "client": "./scripts/serveClient.sh",
+    "build:client": "./scripts/buildClient.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Augustin MERCIER \"Gugustinette\"",
+  "license": "MIT",
+  "dependencies": {
+    "bree": "^7.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "express-jsdoc-swagger": "^1.6.7",
+    "leaflet": "^1.7.1",
+    "mongoose": "^6.2.3",
+    "ner": "^1.0.0",
+    "ner-promise": "^1.0.1",
+    "nlpcloud": "^1.0.16",
+    "node-schedule": "^2.1.0",
+    "twitter-api-v2": "^1.11.0"
+  }
+}
