@@ -7,7 +7,7 @@
           Le site a été développé par
           <a href="https://gugustinette.com">Augustin MERCIER "Gugustinette"</a
           >. Le design et les maquettes ont été réalisées par
-          <a href="https://sallt.fr">Jason MOULIN</a>.
+          <a href="https://www.zukaa.fr/">Jason MOULIN</a>.
         </p>
       </div>
       <div class="footer-section">
